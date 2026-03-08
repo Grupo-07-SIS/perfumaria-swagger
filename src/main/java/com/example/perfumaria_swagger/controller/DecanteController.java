@@ -1,38 +1,81 @@
 package com.example.perfumaria_swagger.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import school.sptech.projetoindividual.Entitie.Decant;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
-import java.util.List;
+import com.example.perfumaria_swagger.model.Decant;
 
-@CrossOrigin("*")
 @RestController
-@RequestMapping("/api/decantes")
+@RequestMapping("/decantes")
+@Tag(name = "Decantes", description = "Gerenciamento de decantes de fragrâncias")
 public class DecanteController {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public DecanteController(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    // ========== GET ==========
+    @GetMapping
+    @Operation(summary = "Listar todos", description = "Retorna uma lista de todos os decantes")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Decant.class))),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> findAll() {
+        return ResponseEntity.status(501).build();
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar por ID", description = "Retorna um decante específico pelo ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Decante encontrado",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Decant.class))),
+        @ApiResponse(responseCode = "404", description = "Decante não encontrado"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> findById(@PathVariable Integer id) {
+        return ResponseEntity.status(501).build();
+    }
+
+    // ========== POST ==========
     @PostMapping
-    public ResponseEntity<Decant> cadastrar(@RequestBody Decant decant) {
-        if (decant.getIdFragrancia() == null || decant.getCapacidadeMl() == null || decant.getPreco() == null) {
-            return ResponseEntity.badRequest().build();
-        }
+    @Operation(summary = "Criar novo", description = "Cria um novo decante")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Decante criado com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Decant.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> save(@RequestBody Decant decant) {
+        return ResponseEntity.status(501).build();
+    }
 
-        List<Decant> decantesExistentes = jdbcTemplate.query("select * from decant where id_fragrancia = ? and capacidade_ml = ?",
-                new BeanPropertyRowMapper<>(Decant.class), decant.getIdFragrancia(), decant.getCapacidadeMl());
+    // ========== PUT ==========
+    @PutMapping("/{id}")
+    @Operation(summary = "Atualizar", description = "Atualiza um decante existente")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Decante atualizado com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Decant.class))),
+        @ApiResponse(responseCode = "404", description = "Decante não encontrado"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Decant decant) {
+        return ResponseEntity.status(501).build();
+    }
 
-        if (!decantesExistentes.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        jdbcTemplate.update("insert into decant (id_fragrancia, capacidade_ml, preco) values (?, ?, ?)",
-                decant.getIdFragrancia(), decant.getCapacidadeMl(), decant.getPreco());
-        return ResponseEntity.status(HttpStatus.CREATED).body(decant);
+    // ========== DELETE ==========
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar", description = "Remove um decante pelo ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Decante deletado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Decante não encontrado"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        return ResponseEntity.status(501).build();
     }
 }

@@ -2,64 +2,80 @@ package com.example.perfumaria_swagger.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import school.sptech.projetoindividual.Entitie.Marca;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
-import java.sql.Statement;
-import java.util.List;
+import com.example.perfumaria_swagger.model.Marca;
 
-@CrossOrigin("*")
 @RestController
-@RequestMapping("/api/marcas")
+@RequestMapping("/marcas")
+@Tag(name = "Marcas", description = "Gerenciamento de marcas de perfumes")
 public class MarcaController {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public MarcaController(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
+    // ========== GET ==========
     @GetMapping
-    public ResponseEntity<List<Marca>> buscarMarcas() {
-        List<Marca> marcas = jdbcTemplate.query("select * from marca", new BeanPropertyRowMapper<>(Marca.class));
-        return ResponseEntity.ok(marcas);
+    @Operation(summary = "Listar todos", description = "Retorna uma lista de todas as marcas")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Marca.class))),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> findAll() {
+        return ResponseEntity.status(501).build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Marca> buscarMarcaPorId(@PathVariable Integer id) {
-        List<Marca> marcas = jdbcTemplate.query("select * from marca where id = ?", new BeanPropertyRowMapper<>(Marca.class), id);
-
-        if (marcas.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        
-        return ResponseEntity.ok(marcas.get(0));
+    @Operation(summary = "Buscar por ID", description = "Retorna uma marca específica pelo ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Marca encontrada",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Marca.class))),
+        @ApiResponse(responseCode = "404", description = "Marca não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> findById(@PathVariable Integer id) {
+        return ResponseEntity.status(501).build();
     }
 
+    // ========== POST ==========
     @PostMapping
-    public ResponseEntity<Marca> cadastrarMarca(@RequestBody Marca marca) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+    @Operation(summary = "Criar novo", description = "Cria uma nova marca")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Marca criada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Marca.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> save(@RequestBody Marca marca) {
+        return ResponseEntity.status(501).build();
+    }
 
-        List<Marca> marcasExistentes = jdbcTemplate.query("select * from marca where nome = ?",
-                new BeanPropertyRowMapper<>(Marca.class), marca.getNome());
+    // ========== PUT ==========
+    @PutMapping("/{id}")
+    @Operation(summary = "Atualizar", description = "Atualiza uma marca existente")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Marca atualizada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Marca.class))),
+        @ApiResponse(responseCode = "404", description = "Marca não encontrada"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Marca marca) {
+        return ResponseEntity.status(501).build();
+    }
 
-        if (!marcasExistentes.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        jdbcTemplate.update(connection -> {
-            var ps = connection.prepareStatement("insert into marca (nome, slug) values (?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-
-            ps.setString(1, marca.getNome());
-            ps.setString(2, marca.getNome().toLowerCase().replaceAll("\\s+", "-"));
-            return ps;
-        }, keyHolder);
-
-        Long id = keyHolder.getKey().longValue();
-
-        Marca marcaCadastrada = jdbcTemplate.queryForObject("select * from marca where id = ?",
-                new BeanPropertyRowMapper<>(Marca.class), id);
-
-        return ResponseEntity.ok(marcaCadastrada);
+    // ========== DELETE ==========
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar", description = "Remove uma marca pelo ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Marca deletada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Marca não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        return ResponseEntity.status(501).build();
     }
 }

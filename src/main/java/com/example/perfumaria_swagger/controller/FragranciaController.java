@@ -1,77 +1,81 @@
 package com.example.perfumaria_swagger.controller;
 
-import java.sql.Statement;
-import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.example.perfumaria_swagger.model.Fragrancia;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-
-@CrossOrigin("*")
 @RestController
-@RequestMapping("/api/fragrancias")
+@RequestMapping("/fragrancias")
+@Tag(name = "Fragrâncias", description = "Gerenciamento de fragrâncias do catálogo")
 public class FragranciaController {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public FragranciaController(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
+    // ========== GET ==========
     @GetMapping
-    public ResponseEntity<List<Fragrancia>> listarFragrancias() {
-
-        List<Fragrancia> fragrancias = jdbcTemplate.query("select * from fragrancia",
-                new BeanPropertyRowMapper<>(Fragrancia.class));
-
-        return ResponseEntity.ok(fragrancias);
+    @Operation(summary = "Listar todos", description = "Retorna uma lista de todas as fragrâncias")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Fragrancia.class))),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> findAll() {
+        return ResponseEntity.status(501).build();
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar por ID", description = "Retorna uma fragrância específica pelo ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Fragrância encontrada",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Fragrancia.class))),
+        @ApiResponse(responseCode = "404", description = "Fragrância não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> findById(@PathVariable Integer id) {
+        return ResponseEntity.status(501).build();
+    }
+
+    // ========== POST ==========
     @PostMapping
-    public ResponseEntity<Fragrancia> cadastrarFragrancia(@RequestBody Fragrancia fragrancia) {
-
-       if(fragrancia.getNome() == null || fragrancia.getNome().trim().isEmpty() ||
-          fragrancia.getIdMarca() == null ||
-          fragrancia.getConcentracao() == null ||
-          fragrancia.getDataAquisicao() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        List<Fragrancia> fragranciasExistentes = jdbcTemplate.query("select * from fragrancia where nome = ?",
-                new BeanPropertyRowMapper<>(Fragrancia.class), fragrancia.getNome());
-
-        if (!fragranciasExistentes.isEmpty()){
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            var ps = connection.prepareStatement(
-                    "insert into fragrancia (nome, id_marca, concentracao, data_aquisicao) values (?, ?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-
-            ps.setString(1, fragrancia.getNome());
-            ps.setInt(2, fragrancia.getIdMarca());
-            ps.setString(3, fragrancia.getConcentracao().name());
-            ps.setDate(4, java.sql.Date.valueOf(fragrancia.getDataAquisicao()));
-            return ps;
-        }, keyHolder);
-
-        Long id = keyHolder.getKey().longValue();
-
-        Fragrancia fragranciaCadastrada = jdbcTemplate.queryForObject("select * from fragrancia where id = ?",
-                new BeanPropertyRowMapper<>(Fragrancia.class), id);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(fragranciaCadastrada);
-
+    @Operation(summary = "Criar novo", description = "Cria uma nova fragrância")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Fragrância criada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Fragrancia.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> save(@RequestBody Fragrancia fragrancia) {
+        return ResponseEntity.status(501).build();
     }
 
+    // ========== PUT ==========
+    @PutMapping("/{id}")
+    @Operation(summary = "Atualizar", description = "Atualiza uma fragrância existente")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Fragrância atualizada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Fragrancia.class))),
+        @ApiResponse(responseCode = "404", description = "Fragrância não encontrada"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Fragrancia fragrancia) {
+        return ResponseEntity.status(501).build();
+    }
+
+    // ========== DELETE ==========
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar", description = "Remove uma fragrância pelo ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Fragrância deletada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Fragrância não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        return ResponseEntity.status(501).build();
+    }
 }

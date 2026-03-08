@@ -1,7 +1,5 @@
 package com.example.perfumaria_swagger.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.util.ArrayList;
 import java.util.List;
 

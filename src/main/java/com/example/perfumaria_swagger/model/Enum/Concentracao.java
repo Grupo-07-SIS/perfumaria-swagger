@@ -7,6 +7,7 @@ public enum Concentracao {
     EDC("EDC"),
     EAU_FRAICHE("EAU_FRAICHE");
 
+    @SuppressWarnings("unused")
     private final String valorDb;
 
     Concentracao(String valorDb) {

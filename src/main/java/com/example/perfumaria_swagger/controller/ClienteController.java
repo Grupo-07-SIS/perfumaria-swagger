@@ -1,55 +1,81 @@
 package com.example.perfumaria_swagger.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.example.perfumaria_swagger.model.Cliente;
 
 @RestController
-@CrossOrigin(origins = "http://127.0.0.1:5500")
+@RequestMapping("/clientes")
+@Tag(name = "Clientes", description = "Gerenciamento de clientes da perfumaria")
 public class ClienteController {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @PostMapping("/clientes")
-    public ResponseEntity<Cliente> cadastro(@RequestBody Cliente cliente) {
-        try {
-            LocalDate dataCadastro = LocalDate.parse(cliente.getDataCadastro());
-
-            jdbcTemplate.update(
-                    "INSERT INTO cliente(nome, email, telefone, idade, endereco, data_cadastro, genero, interesse, tipo_cliente_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    cliente.getNome(),
-                    cliente.getEmail(),
-                    cliente.getTelefone(),
-                    cliente.getIdade(),
-                    cliente.getEndereco(),
-                    java.sql.Date.valueOf(dataCadastro),
-                    cliente.getGenero(),
-                    String.join(",", cliente.getInteresses()),
-                    cliente.getTipoClienteId()
-            );
-
-            cliente.setDataCadastro(dataCadastro.toString());
-
-            return ResponseEntity.status(201).body(cliente);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(400).body(null);
-        }
+    // ========== GET ==========
+    @GetMapping
+    @Operation(summary = "Listar todos", description = "Retorna uma lista de todos os clientes")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Cliente.class))),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> findAll() {
+        return ResponseEntity.status(501).build();
     }
 
-    @GetMapping("/tipos")
-    public ResponseEntity<List<TipoCliente>> listarTipos(){
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar por ID", description = "Retorna um cliente específico pelo ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Cliente encontrado",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Cliente.class))),
+        @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> findById(@PathVariable Integer id) {
+        return ResponseEntity.status(501).build();
+    }
 
-        List<TipoCliente> tipos = jdbcTemplate.query(
-                "SELECT * FROM tipo_cliente",
-                new BeanPropertyRowMapper<>(TipoCliente.class)
-        );
+    // ========== POST ==========
+    @PostMapping
+    @Operation(summary = "Criar novo", description = "Cria um novo cliente")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Cliente criado com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Cliente.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> save(@RequestBody Cliente cliente) {
+        return ResponseEntity.status(501).build();
+    }
 
-        return ResponseEntity.ok(tipos);
+    // ========== PUT ==========
+    @PutMapping("/{id}")
+    @Operation(summary = "Atualizar", description = "Atualiza um cliente existente")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Cliente atualizado com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Cliente.class))),
+        @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Cliente cliente) {
+        return ResponseEntity.status(501).build();
+    }
+
+    // ========== DELETE ==========
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar", description = "Remove um cliente pelo ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Cliente deletado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
+        @ApiResponse(responseCode = "500", description = "Erro no servidor")
+    })
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        return ResponseEntity.status(501).build();
     }
 }
