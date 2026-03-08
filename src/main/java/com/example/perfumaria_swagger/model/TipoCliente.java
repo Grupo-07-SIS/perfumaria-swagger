@@ -1,7 +1,5 @@
 package com.example.perfumaria_swagger.model;
 
-import java.util.UUID;
-
 public class TipoCliente {
 
     private Integer id;
